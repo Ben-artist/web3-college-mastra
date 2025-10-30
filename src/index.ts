@@ -11,7 +11,7 @@ async function main() {
   const sampleText = process.argv.slice(2).join(" ") || "这里是一段待审核的示例文本";
   const result = await checkForBanned(sampleText, [
     // 可添加自定义违禁词，例如：
-    // "违禁词A", "敏感词B"
+    // "违禁词A", "敏感词B" 
   ]);
 
   // eslint-disable-next-line no-console
