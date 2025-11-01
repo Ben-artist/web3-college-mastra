@@ -10,9 +10,9 @@
    - shell 临时设置：
      ```bash
      export DEEPSEEK_API_KEY="<你的_deepseek_key>"
-     export DEEPSEEK_BASE_URL="https://api.deepseek.com"   # 可选，默认此值
-     export DEEPSEEK_MODEL_ID="deepseek-chat"               # 可选
+     export DEEPSEEK_MODEL_ID="deepseek-chat"               # 可选，默认使用 deepseek/deepseek-chat
      ```
+   - 注意：Mastra 会自动使用 `DEEPSEEK_API_KEY` 环境变量，无需额外配置 baseURL
 
 2. 安装依赖并本地运行示例：
    ```bash
@@ -82,10 +82,16 @@ curl -X POST http://localhost:8787/moderation/check \
 
 ### 实现说明
 
-- 使用 Mastra 的 `Agent` + OpenAI 兼容 Provider 接入 DeepSeek：
-  - 通过 `baseURL=https://api.deepseek.com` 与 `apiKey=DEEPSEEK_API_KEY`。
-  - 模型名默认 `deepseek-chat`，可通过环境变量覆盖。
-- 审核提示词（system）要求输出严格 JSON，并约束匹配规则（直接命中或语义相近变体）。
+- 使用 Mastra 框架的 `Agent` 类集成 DeepSeek：
+  - 模型标识使用 `deepseek/deepseek-chat` 格式，Mastra 会自动识别并使用 `DEEPSEEK_API_KEY` 环境变量进行认证
+  - 模型名默认 `deepseek/deepseek-chat`，可通过 `DEEPSEEK_MODEL_ID` 环境变量覆盖（例如设置为 `deepseek-reasoner`）
+  - 通过 `Agent` 的 `instructions` 配置系统提示词，要求输出严格 JSON 格式
+  - 使用 `agent.generate()` 方法生成响应，并解析 JSON 结果
+  - 审核提示词要求输出严格 JSON，并约束匹配规则（直接命中或语义相近变体）
+
+### Mastra DeepSeek 集成
+
+本项目遵循 Mastra 官方文档的 DeepSeek 集成方式，详情参考：[Mastra DeepSeek Provider 文档](https://mastra.ai/models/providers/deepseek)
 
 ### 参考链接
 
