@@ -1,51 +1,59 @@
-## web3-college-mastra 违禁词检测 Agent
+## web3-college-mastra 违禁词检测 Worker
 
-本包使用 Mastra（TypeScript Agent Framework）与 DeepSeek（OpenAI 兼容 API）实现“文本违禁词检测”智能体。你可以调用导出的 `checkForBanned(text, customBanned?)` 来判断一段文本是否包含违禁词或其变体，并获得结构化结果。
+基于 Cloudflare Workers 的文本违禁词检测服务，使用 DeepSeek（OpenAI 兼容 API）实现智能审核。
 
-参考：Mastra 官网文档与产品介绍（统一模型、工作流、可观测性等能力），见 [Mastra 官网](https://mastra.ai/)。
+### 部署到 Cloudflare Workers
 
-### 安装与运行
+本项目已适配 Cloudflare Workers，可以无服务器方式运行。
 
-1. 在项目根目录配置 DeepSeek API Key（不要将密钥写入代码仓库）：
-   - shell 临时设置：
-     ```bash
-     export DEEPSEEK_API_KEY="<你的_deepseek_key>"
-     export DEEPSEEK_MODEL_ID="deepseek-chat"               # 可选，默认使用 deepseek/deepseek-chat
-     ```
-   - 注意：Mastra 会自动使用 `DEEPSEEK_API_KEY` 环境变量，无需额外配置 baseURL
-
-2. 安装依赖并本地运行示例：
-   ```bash
-   cd web3-college-mastra
-   pnpm i # 或 npm i / yarn
-   pnpm dev "我想发一些不当的文字..."
-   ```
-
-3. 作为库使用：
-   ```ts
-   import { checkForBanned } from "web3-college-mastra/dist";
-
-   const result = await checkForBanned("待审核文本", ["自定义违禁词A"]);
-   ```
-
-### 导出 API
-
-- `checkForBanned(text: string, customBanned?: string[]): Promise<{ hasViolation: boolean; matchedTerms: string[]; reasoning: string; }>`
-  - **text**: 待检测文本
-  - **customBanned**: 可选，自定义违禁词（精确词条），用来补充或覆盖模型判断
-  - 返回：
-    - **hasViolation**: 是否命中违禁
-    - **matchedTerms**: 实际命中的违禁词或其变体（最多 10 个）
-    - **reasoning**: 简短中文说明理由
-
-### 启动本地 HTTP 服务
+#### 1. 安装依赖
 
 ```bash
-pnpm serve
-# 默认端口 8787，可通过 PORT=xxxx 覆盖
+pnpm install
 ```
 
-接口：`POST /moderation/check`
+#### 2. 登录 Cloudflare
+
+```bash
+npx wrangler login
+```
+
+#### 3. 配置 Secrets（DeepSeek API Key）
+
+```bash
+# DeepSeek API Key（必填）
+npx wrangler secret put DEEPSEEK_API_KEY
+
+# DeepSeek Base URL（可选，默认 https://api.deepseek.com）
+npx wrangler secret put DEEPSEEK_BASE_URL
+
+# DeepSeek Model ID（可选，默认 deepseek-chat）
+npx wrangler secret put DEEPSEEK_MODEL_ID
+```
+
+#### 4. 本地开发测试
+
+```bash
+pnpm dev
+```
+
+#### 5. 部署到生产环境
+
+```bash
+pnpm deploy
+```
+
+#### 6. 查看实时日志
+
+```bash
+pnpm tail
+```
+
+#### API 接口
+
+部署后的 Worker 提供以下接口：
+
+**违禁词检测接口：** `POST /moderation/check`
 
 请求体：
 ```json
@@ -64,14 +72,20 @@ pnpm serve
 }
 ```
 
+**健康检查接口：** `GET /health`
+
 curl 示例：
 ```bash
-curl -X POST http://localhost:8787/moderation/check \
+# 检测违禁词
+curl -X POST https://your-worker.your-subdomain.workers.dev/moderation/check \
   -H "Content-Type: application/json" \
   -d '{
     "text": "我想买枪和弹药",
     "customBanned": ["枪", "弹药"]
   }'
+
+# 健康检查
+curl https://your-worker.your-subdomain.workers.dev/health
 ```
 
 ### 安全与合规
@@ -82,19 +96,7 @@ curl -X POST http://localhost:8787/moderation/check \
 
 ### 实现说明
 
-- 使用 Mastra 框架的 `Agent` 类集成 DeepSeek：
-  - 模型标识使用 `deepseek/deepseek-chat` 格式，Mastra 会自动识别并使用 `DEEPSEEK_API_KEY` 环境变量进行认证
-  - 模型名默认 `deepseek/deepseek-chat`，可通过 `DEEPSEEK_MODEL_ID` 环境变量覆盖（例如设置为 `deepseek-reasoner`）
-  - 通过 `Agent` 的 `instructions` 配置系统提示词，要求输出严格 JSON 格式
-  - 使用 `agent.generate()` 方法生成响应，并解析 JSON 结果
-  - 审核提示词要求输出严格 JSON，并约束匹配规则（直接命中或语义相近变体）
-
-### Mastra DeepSeek 集成
-
-本项目遵循 Mastra 官方文档的 DeepSeek 集成方式，详情参考：[Mastra DeepSeek Provider 文档](https://mastra.ai/models/providers/deepseek)
-
-### 参考链接
-
-- Mastra 产品与文档：[Mastra 官网](https://mastra.ai/)
-
-
+- 在 Workers 环境中直接调用 DeepSeek API（OpenAI 兼容格式）
+- 通过 Workers Secrets 管理 API Key，安全可靠
+- 支持 CORS，可直接从前端调用
+- 使用 JSON 格式输出，包含违禁词匹配结果和推理说明
