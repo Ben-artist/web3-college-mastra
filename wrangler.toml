@@ -1,10 +1,23 @@
 # Cloudflare Workers 配置文件
 # 用于部署违禁词检测服务
 
-name = "web3-college-mastra"
+name = "web3-collage-mastra"
 main = "src/worker.ts"
 compatibility_date = "2024-11-02"
 
+# 自定义域名配置
+# 域名: mastra.ai-talk.life
+# 
+# 配置步骤：
+# 1. 在 GoDaddy 中将域名 DNS 服务器改为 Cloudflare（获取 Cloudflare DNS 服务器地址）
+# 2. 在 Cloudflare Dashboard 中添加域名 ai-talk.life
+# 3. 在 Cloudflare Dashboard -> Workers & Pages -> web3-collage-mastra -> Settings -> 域和路由
+#    添加路由: mastra.ai-talk.life
+# 4. Cloudflare 会自动配置 DNS 记录（CNAME 指向 workers.dev）
+#
+# 注意：自定义域名配置需要在 Cloudflare Dashboard 中完成，无法通过 wrangler.toml 配置
+
+# 环境变量配置
 # 注意：
 # - DEEPSEEK_API_KEY 等敏感信息需要通过 wrangler secret 命令设置
 # - 不要在此文件中硬编码 API 密钥

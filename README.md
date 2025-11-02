@@ -10,6 +10,7 @@
 
 - ✅ **智能违禁词检测**: 使用 DeepSeek LLM 进行语义级别的违禁内容识别
 - ✅ **自定义违禁词**: 支持传入自定义违禁词列表，灵活配置检测规则
+- ✅ **自定义域名支持**: 支持绑定自定义域名（如：mastra.ai-talk.life）
 - ✅ **CORS 支持**: 完整支持跨域请求
 - ✅ **错误处理**: 完善的错误处理和降级机制
 - ✅ **TypeScript 支持**: 完整的类型定义和类型安全
@@ -113,6 +114,52 @@ pnpm run worker:tail
 ```
 
 **注意**：部署前确保已创建 `wrangler.toml` 配置文件，否则部署将失败。
+
+### 4. 配置自定义域名（可选）
+
+如果你想使用自定义域名 `mastra.ai-talk.life`，需要完成以下步骤：
+
+#### 步骤 1: 将域名添加到 Cloudflare
+
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
+2. 点击 "Add a Site" 添加域名 `ai-talk.life`
+3. 按照提示完成域名验证
+4. Cloudflare 会提供两个 DNS 服务器地址（例如：`xxx.ns.cloudflare.com`）
+
+#### 步骤 2: 在 GoDaddy 中更改 DNS 服务器
+
+1. 登录 [GoDaddy](https://www.godaddy.com)
+2. 进入域名管理页面，找到 `ai-talk.life`
+3. 将 DNS 服务器改为 Cloudflare 提供的地址
+4. 等待 DNS 传播（通常几分钟到几小时）
+
+#### 步骤 3: 在 Cloudflare 中配置自定义域名
+
+1. 在 Cloudflare Dashboard 中，进入 **Workers & Pages**
+2. 选择你的 Worker：`web3-college-mastra`
+3. 进入 **Settings** -> **Triggers**
+4. 在 **Custom Domains** 部分，点击 **Add Custom Domain**
+5. 输入子域名：`mastra.ai-talk.life`
+6. Cloudflare 会自动创建必要的 DNS 记录（CNAME 记录）
+
+#### 步骤 4: 验证配置
+
+等待几分钟让 DNS 生效，然后测试：
+
+```bash
+# 测试健康检查接口
+curl https://mastra.ai-talk.life/health
+
+# 测试违禁词检测接口
+curl -X POST https://mastra.ai-talk.life/moderation/check \
+  -H "Content-Type: application/json" \
+  -d '{"text": "测试文本"}'
+```
+
+**注意事项**：
+- DNS 传播可能需要几小时才能完全生效
+- 确保在 Cloudflare Dashboard 中已正确配置 SSL/TLS（默认自动启用）
+- 如果域名已添加到 Cloudflare，Worker 会自动使用该域名的 SSL 证书
 
 ## API 接口
 
