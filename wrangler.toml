@@ -1,7 +1,7 @@
 # Cloudflare Workers 配置文件
 # 用于部署违禁词检测服务
 
-name = "web3-college-mastra"
+name = "web3-collage-mastra"
 main = "src/worker.ts"
 compatibility_date = "2024-11-02"
 
