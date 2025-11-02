@@ -1,0 +1,12 @@
+# Cloudflare Workers 配置文件
+# 用于部署违禁词检测服务
+
+name = "web3-college-mastra"
+main = "src/worker.ts"
+compatibility_date = "2024-11-02"
+
+# 注意：
+# - DEEPSEEK_API_KEY 等敏感信息需要通过 wrangler secret 命令设置
+# - 不要在此文件中硬编码 API 密钥
+# - 使用命令：wrangler secret put DEEPSEEK_API_KEY
+
