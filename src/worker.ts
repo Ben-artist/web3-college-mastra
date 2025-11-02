@@ -77,7 +77,7 @@ async function handleModerationCheck(
         headers: getCorsHeaders(),
       }
     );
-  }
+  } 
 }
 
 // Workers fetch handler

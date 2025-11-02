@@ -6,14 +6,10 @@ node_modules/
 dist/
 *.js.map
 
-# Cloudflare Workers
-.wrangler/
-
 # Environment variables
 .env
 .env.local
 .env.*.local
-.dev.vars
 
 # IDE
 .vscode/
